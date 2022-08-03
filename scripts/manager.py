@@ -2,6 +2,7 @@ import os
 import shutil
 import argparse
 import subprocess
+
 from deepex.utils import *
 from requests import get
 
@@ -11,8 +12,10 @@ def SysCall(command):
         shell=True
     ).wait()
 
+extra_files = ["Football_Test"]
+
 def PreprocessData(META_TASK, RAW_PATH, DATA_PATH):
-    if META_TASK in ["OIE_2016"]:
+    if META_TASK in ["OIE_2016"] + extra_files:
         Create(DATA_PATH)
         for i, t in enumerate(['test', 'dev']):
             data = []; file_path = RAW_PATH+f"{t}.txt"
@@ -56,7 +59,7 @@ if __name__=="__main__":
             'PENN',
             'FewRel',
             'TACRED',
-        ],
+        ] + extra_files,
         help = "The task to be run"
     )
     parser.add_argument("-m", "--model", dest="model", type=str, default='bert-large-cased',
@@ -164,7 +167,7 @@ if __name__=="__main__":
             "python3 scripts/ranking.py -proc_dir {0} -clss_dir {1} -dest {2}".format(args.proc_dir,args.clss_dir,RESULT+".sorted")
         )
 
-    if args.stage<=3 and (args.stage==3 or not args.debug) and (args.task_meta in ['OIE_2016','WEB','NYT','PENN']):
+    if args.stage<=3 and (args.stage==3 or not args.debug) and (args.task_meta in ['OIE_2016','WEB','NYT','PENN'] + extra_files):
         RESULT = "result/" + ".".join([args.task,args.model,args.ner_mode,f"d{args.max_distance}",f"b{args.beam_size}"])
         SysCall(
             "python3 scripts/oie/evaluate_oie.py -dir {0} -task {1}".format(RESULT+".sorted/",args.task)
